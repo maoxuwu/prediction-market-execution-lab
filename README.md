@@ -1,12 +1,21 @@
 # Prediction Market Execution Lab
 
-Can a quoted spread survive the time it takes to buy both legs? In the worked example, a wallet can afford five complementary pairs for **4.48**. The first order fills, then liquidity on the second leg shrinks. The ledger shows **+0.22 realised**, while the remaining position can still take the trade to **−0.89** at settlement.
+[![Offline tests](https://github.com/maoxuwu/prediction-market-execution-lab/actions/workflows/tests.yml/badge.svg)](https://github.com/maoxuwu/prediction-market-execution-lab/actions/workflows/tests.yml)
 
-I built and operated a Python trading system as an individual participant in the **2026 Susquehanna Predictions Cup**, a simulated competition. It began with passive quoting and grew to include sequential paired orders, event-driven signals and a reconciled inventory ledger. This repository is an independently implemented, offline companion to that project. All prices, events and fills distributed here are invented for the examples. [Project retrospective](docs/retrospective.md) · [Official competition](https://predictionscup.com/rules/)
+When a trading rule buys very little, did the order arrive late, did the book run out, or did the rule itself stop buying? In the **2026 Susquehanna Predictions Cup**, I initially suspected timing and liquidity. Replaying a result-following trade showed that the best price still had ample size in the last book observed before submission. My limit on spending in one race had set the quantity.
+
+I entered the simulated competition as an individual. I set the strategy objectives and risk limits, used AI coding agents to implement and monitor the system, and reviewed the resulting trades. I put together this offline lab after the competition so readers can run selected experiments with independently invented inputs. [Project retrospective](docs/retrospective.md) · [Official competition](https://predictionscup.com/rules/)
+
+| Competition phase | Question I investigated | Explore in the lab |
+| --- | --- | --- |
+| Passive quoting | How could I tell whether my resting order filled? | [A trade at my price](docs/retrospective.md#a-print-at-my-price) |
+| Paired orders | What happens if the second order fills only partly? | [Change the second book](#run-the-experiment) |
+| Inventory study | How much capital was still tied up at a fixed horizon? | [Choose the exit-rate denominator](docs/experiments.md#the-denominator-in-an-exit-rate) |
+| Result-following orders | Which constraint determined the size I could buy? | [Revisit the decision](docs/retrospective.md#what-changed-on-election-night) |
 
 ## Run the experiment
 
-From the repository root, using Python 3.10 or later and its standard library:
+Five complementary pairs meet the all-in cost limit of 1 per pair, for a total planned cost of **4.48**. The sixth pair would cost 1.04 including fees. The first order fills, then the second book changes. Run the example with Python 3.10 or later and its standard library.
 
 ```sh
 python3 -m marketlab.demo
@@ -27,12 +36,12 @@ At depth two, two pairs redeem for 2. Their acquisition cost, including fees, wa
 
 ## Questions you can reproduce
 
-| Question | Implementation | What to look for |
+| Question | Competition system | Public example and its assumptions |
 | --- | --- | --- |
-| How much fits inside one wallet? | [Depth and sizing](marketlab/depth.py) | Walk each ask level, charge both fees, and stop at the marginal pair-cost limit. |
-| What was known when a decision was made? | [Point-in-time evidence](marketlab/evidence.py) | Match the exact proposition and use the time each version was actually received. |
-| What survives a process restart? | [SQLite intent journal](marketlab/journal.py) | A claimed action stays unresolved until a verified terminal receipt is supplied. |
-| Which part of an offset is income? | [FIFO ledger](marketlab/ledger.py) | Allocate fees across partial fills and reconcile cash, remaining cost and realised P&L. |
-| How often did inventory exit within a deadline? | [Cohort analysis](marketlab/cohorts.py) | Track partial exits against original entry units and show how much inventory has had a full observation window. |
+| How much fits inside one wallet? | Two NO orders on separate contracts required compatible payout rules. The system could attempt a repair within a loss limit. | [Second-leg demo](marketlab/demo.py) buys YES and NO on one proposition. A partial fill leaves the remaining shares open. |
+| What could the strategy know at decision time? | Each external report had a version, a receipt time and a contract to match. | [Point-in-time query](marketlab/evidence.py) uses a single stream with a shared clock. |
+| How does an order survive a lost reply? | Recovery matched the original request to order history or checked for any account effect after expiry. | [SQLite journal](marketlab/journal.py) persists the intent and accepts a terminal receipt verified by its caller. |
+| Which part of an offset is income? | The ledger reconciled actual quantities, costs and fees to the account. | [FIFO ledger](marketlab/ledger.py) takes verified fills as input and assumes unit redemption on a same-contract offset. |
+| How often did inventory exit within a deadline? | The study followed each entry cohort, including unsold units, over a fixed window. | [Cohort analysis](marketlab/cohorts.py) distinguishes normal sales, repairs and units too young for the comparison. |
 
 The journal and fill ledger are separate teaching components. The caller provides verified fills in execution order. The examples assume immediate unit redemption for opposite sides of the same contract. Cross-contract trades require their own outcome-by-outcome payout analysis. [Model assumptions and research examples](docs/experiments.md)
