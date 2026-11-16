@@ -6,12 +6,14 @@ When a trading rule buys very little, did the order arrive late, did the book ru
 
 I entered the simulated competition as an individual. I set the strategy objectives and risk limits, used AI coding agents to implement and monitor the system, and reviewed the resulting trades. I put together this offline lab after the competition so readers can run selected experiments with independently invented inputs. [Project retrospective](docs/retrospective.md) · [Official competition](https://predictionscup.com/rules/)
 
+**Start with the [budget replay](docs/decision-replay.md).** Run `python3 -m marketlab.replay` to vary the spending limits on a fixed sequence of books. One example also lets you see what happens when the offer disappears before the order arrives.
+
 | Competition phase | Question I investigated | Explore in the lab |
 | --- | --- | --- |
 | Passive quoting | How could I tell whether my resting order filled? | [A trade at my price](docs/retrospective.md#a-print-at-my-price) |
 | Paired orders | What happens if the second order fills only partly? | [Change the second book](#run-the-experiment) |
 | Inventory study | How much capital was still tied up at a fixed horizon? | [Choose the exit-rate denominator](docs/experiments.md#the-denominator-in-an-exit-rate) |
-| Result-following orders | Which constraint determined the size I could buy? | [Revisit the decision](docs/retrospective.md#what-changed-on-election-night) |
+| Result-following orders | Which constraint determined the size I could buy? | [Replay the same books under four budget rules](docs/decision-replay.md) |
 
 ## Run the experiment
 

@@ -22,6 +22,8 @@ Other decisions faced different constraints. On an external price move, the loca
 
 One change that affected actual entries was separating an external outcome report from a tradable quote. An external venue could settle a market and stop quoting while a matching local contract still traded. An early filter discarded the result along with the empty quote. The revised entry rule checked that the result referred to the same proposition, then read the local book. For exits from result-following inventory the system separately checked the cost of the FIFO inventory and allowed for a fee before placing the offset.
 
+The [public decision replay](decision-replay.md) uses a new fictional sequence of events to illustrate the budget comparison and a disappearing quote. Its outputs describe the example's assumptions.
+
 ## What I would test next
 
 The first budget replay used the books for entries that actually traded. I would extend it to rejected candidates, keeping them in receipt order and giving every rule the same wallet. I would record whether there was a sufficient book, a fully observed empty book, or no book at the decision time. Only the first two observations support a numerical size comparison.
