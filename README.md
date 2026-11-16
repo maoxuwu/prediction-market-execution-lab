@@ -8,6 +8,8 @@ I entered the simulated competition as an individual. I set the strategy objecti
 
 **Start with the [budget replay](docs/decision-replay.md).** Run `python3 -m marketlab.replay` to vary the spending limits on a fixed sequence of books. One example also lets you see what happens when the offer disappears before the order arrives.
 
+For the engineering case, run `python3 -m marketlab.recovery_demo`. It reopens a temporary SQLite journal after a simulated lost acknowledgement and shows which evidence can [resolve the original order](docs/experiments.md#when-the-reply-goes-missing).
+
 | Competition phase | Question I investigated | Explore in the lab |
 | --- | --- | --- |
 | Passive quoting | How could I tell whether my resting order filled? | [A trade at my price](docs/retrospective.md#a-print-at-my-price) |
@@ -42,7 +44,7 @@ At depth two, two pairs redeem for 2. Their acquisition cost, including fees, wa
 | --- | --- | --- |
 | How much fits inside one wallet? | Two NO orders on separate contracts required compatible payout rules. The system could attempt a repair within a loss limit. | [Second-leg demo](marketlab/demo.py) buys YES and NO on one proposition. A partial fill leaves the remaining shares open. |
 | What could the strategy know at decision time? | Each external report had a version, a receipt time and a contract to match. | [Point-in-time query](marketlab/evidence.py) uses a single stream with a shared clock. |
-| How does an order survive a lost reply? | Recovery matched the original request to order history or checked for any account effect after expiry. | [SQLite journal](marketlab/journal.py) persists the intent and accepts a terminal receipt verified by its caller. |
+| How does an order survive a lost reply? | Recovery matched the original request to order history or checked for any account effect after expiry. | [Lost-reply exercise](marketlab/recovery_demo.py) follows one isolated buy. It checks order history, fills and the wallet, and leaves ambiguous evidence pending. |
 | Which part of an offset is income? | The ledger reconciled actual quantities, costs and fees to the account. | [FIFO ledger](marketlab/ledger.py) takes verified fills as input and assumes unit redemption on a same-contract offset. |
 | How often did inventory exit within a deadline? | The study followed each entry cohort, including unsold units, over a fixed window. | [Cohort analysis](marketlab/cohorts.py) distinguishes normal sales, repairs and units too young for the comparison. |
 

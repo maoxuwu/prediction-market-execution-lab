@@ -14,7 +14,17 @@ The [cohort tests](../tests/test_cohorts.py) exercise FIFO attribution, eligibil
 
 ## When the reply goes missing
 
-Imagine an intent is saved, a request could have reached the venue, and the process stops before recording the reply. A new process inherits the unresolved intent. The [SQLite example](../marketlab/journal.py) stores the claim before any hypothetical send. It gives only one caller permission to attempt that immutable intent. A terminal receipt closes the record after independent verification. If no evidence arrives, the intent stays unresolved. This sacrifices possible execution to prevent duplicate exposure.
+An order is saved, the process starts a submission and the acknowledgement never arrives. The wallet might already hold the shares. Run `python3 -m marketlab.recovery_demo` to see the [journal](../marketlab/journal.py) reopen and evaluate fictional account records.
+
+The exercise follows a single buy in a wallet that starts with no opposite-side inventory. Cash, prices and fees are in integer cents. The journal records the requested terms and opening balance as `PREPARED`. Before an order could leave, one caller must commit a transition to `POSSIBLY_SENT`. A crash on either side of the outbound call can leave that same state. Recovery can check evidence repeatedly without sending another order.
+
+| Evidence available after restart | Journal outcome |
+| --- | --- |
+| A unique terminal order matches the original terms and time window. Its fills, fees, cash change and share change reconcile. | `MATCHED_ORDER`. A terminal partial fill accounts for the quantity that actually traded. |
+| Complete order and fill histories cover the submission through a closing observation after expiry. There is no order or fill in that window and cash and shares agree with the opening balance. | `NO_EFFECT`. The original submission remains consumed. |
+| History is incomplete, two records fit, a matching order is still open, or the wallet disagrees with the fills. | `POSSIBLY_SENT`. The journal keeps the original intent unresolved. |
+
+The supplied history stands in for final order and trade pages from the venue. The caller supplies their coverage and an independently observed closing balance. Cash and holdings can return to their starting values after intervening trades, so identical balances alone cannot establish an empty history. The code and examples use local records throughout.
 
 The [FIFO account example](../marketlab/ledger.py) starts one step later, from verified fills. A partially matched buy can both close old lots and open a new one. Each side's actual fill fee is allocated to the matched or remaining units. After every event, cash plus remaining acquisition cost equals initial capital plus realised P&L. A market-value estimate would also include the unrealised gain or loss on current inventory.
 
